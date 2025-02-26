@@ -44,3 +44,9 @@ This project is a sample Java Spring Boot application built with Gradle. It demo
 ```bash
 git clone <repository_url>
 cd gradle-java-project
+
+---
+
+## Contact
+
+**Dzmitry Ivaniuta** — [diafter@gmail.com](mailto:diafter@gmail.com) — [GitHub](https://github.com/DimitryIvaniuta)
