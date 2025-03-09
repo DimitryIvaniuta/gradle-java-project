@@ -2,6 +2,7 @@ package com.gradleproject.service;
 
 import com.gradleproject.model.User;
 import com.gradleproject.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -12,8 +13,12 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public UserService(UserRepository userRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+
     }
 
     // Retrieve all users
@@ -28,7 +33,6 @@ public class UserService {
 
     // Create a new user
     public User createUser(User user) {
-
         return userRepository.save(user);
     }
 
@@ -49,4 +53,10 @@ public class UserService {
             return true;
         }).orElse(false);
     }
+
+    public User registerUser(User user) {
+        user.setPassword(passwordEncoder.encode(user.getPassword())); // Hash the password
+        return userRepository.save(user);
+    }
+
 }

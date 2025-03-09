@@ -25,3 +25,16 @@ logging:
   level:
     root: INFO
     com.example.demo: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    loggers:
+      enabled: true

@@ -3,12 +3,12 @@ package com.gradleproject.controller;
 import com.gradleproject.dto.UserRequest;
 import com.gradleproject.dto.UserResponse;
 import com.gradleproject.model.User;
+import com.gradleproject.model.UserMapper;
 import com.gradleproject.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/users")
@@ -16,8 +16,11 @@ public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
+    private final UserMapper userMapper;
+
+    public UserController(UserService userService, UserMapper userMapper) {
         this.userService = userService;
+        this.userMapper = userMapper;
     }
 
     // Get all users
@@ -52,16 +55,8 @@ public class UserController {
     // Create a new user
     @PostMapping
     public ResponseEntity<UserResponse> createUser(@RequestBody UserRequest user) {
-        User newUser = new User(user.getLogin(), user.getName(), user.getEmail(), user.getPassword());
-        User created = userService.createUser(newUser);
-        UserResponse response = new UserResponse(
-                created.getId(),
-                created.getLogin(),
-                created.getName(),
-                created.getEmail(),
-                created.getCreatedAt()
-        );
-        return ResponseEntity.ok(response);
+        User created = userService.createUser(user.toUser());
+        return ResponseEntity.ok(userMapper.toResponse(created));
     }
 
     // Update an existing user
@@ -78,4 +73,11 @@ public class UserController {
         boolean deleted = userService.deleteUser(id);
         return deleted ? ResponseEntity.ok().build() : ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/register")
+    public ResponseEntity<UserResponse> registerUser(@RequestBody UserRequest user) {
+        User created = userService.registerUser(user.toUser());
+        return ResponseEntity.ok(userMapper.toResponse(created));
+    }
+
 }
