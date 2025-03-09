@@ -32,7 +32,7 @@ public class UserController {
                         user.getEmail(),
                         user.getCreatedAt()
                 ))
-                .collect(Collectors.toList());
+                .toList();
         return ResponseEntity.ok(users);
     }
 
