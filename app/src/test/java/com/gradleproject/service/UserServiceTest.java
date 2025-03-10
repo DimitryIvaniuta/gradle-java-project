@@ -1,4 +1,4 @@
-package gradleproject.service;
+package com.gradleproject.service;
 
 import com.gradleproject.model.User;
 import com.gradleproject.repository.UserRepository;

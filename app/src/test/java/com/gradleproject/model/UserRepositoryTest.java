@@ -1,4 +1,4 @@
-package gradleproject.model;
+package com.gradleproject.model;
 
 import com.gradleproject.GradleProjectApplication;
 import com.gradleproject.model.User;

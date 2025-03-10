@@ -1,6 +1,5 @@
-package gradleproject.model;
+package com.gradleproject.model;
 
-import com.gradleproject.model.User;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalDateTime;

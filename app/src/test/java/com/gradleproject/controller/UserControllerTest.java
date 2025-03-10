@@ -1,4 +1,4 @@
-package gradleproject.controller;
+package com.gradleproject.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gradleproject.GradleProjectApplication;
@@ -10,11 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.hamcrest.Matchers.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -22,6 +24,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 class UserControllerTest {
+
+    private static final String LOGIN = "jane_doe";
+    private static final String PASSWORD = "secret";
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private MockMvc mockMvc;
@@ -37,14 +45,19 @@ class UserControllerTest {
     @BeforeEach
     void setUp() {
         userRepository.deleteAll();
-        testUser = new User("john_doe", "john_doe", "john@example.com", "password");
-        testUser = userRepository.save(testUser);
+        User user = new User();
+        user.setLogin(LOGIN);
+        user.setPassword(passwordEncoder.encode(PASSWORD));
+        user.setName("Jane Doe");
+        user.setEmail("jane@example.com");
+        testUser = userRepository.save(user);
     }
+
 
     @Test
     @WithMockUser
     void testGetAllUsers() throws Exception {
-        mockMvc.perform(get("/users"))
+        mockMvc.perform(get("/users").with(httpBasic(LOGIN, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].name", is(testUser.getName())));
@@ -53,7 +66,7 @@ class UserControllerTest {
     @Test
     @WithMockUser
     void testGetUserById() throws Exception {
-        mockMvc.perform(get("/users/{id}", testUser.getId()))
+        mockMvc.perform(get("/users/{id}", testUser.getId()).with(httpBasic(LOGIN, PASSWORD)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name", is(testUser.getName())));
     }
@@ -61,7 +74,7 @@ class UserControllerTest {
     @Test
     void testCreateUser() throws Exception {
         User newUser = new User("jane_doe", "jane_doe", "jane@example.com", "secret");
-        mockMvc.perform(post("/users")
+        mockMvc.perform(post("/users").with(httpBasic(LOGIN, PASSWORD))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(newUser)))
                 .andExpect(status().isOk())
@@ -72,7 +85,7 @@ class UserControllerTest {
     @Test
     void testUpdateUser() throws Exception {
         testUser.setName("updated_name");
-        mockMvc.perform(put("/users/{id}", testUser.getId())
+        mockMvc.perform(put("/users/{id}", testUser.getId()).with(httpBasic(LOGIN, PASSWORD))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(testUser)))
                 .andExpect(status().isOk())
@@ -81,11 +94,11 @@ class UserControllerTest {
 
     @Test
     void testDeleteUser() throws Exception {
-        mockMvc.perform(delete("/users/{id}", testUser.getId()))
+        mockMvc.perform(delete("/users/{id}", testUser.getId()).with(httpBasic(LOGIN, PASSWORD)))
                 .andExpect(status().isOk());
 
         // Verify deletion
-        mockMvc.perform(get("/users/{id}", testUser.getId()))
+        mockMvc.perform(get("/users/{id}", testUser.getId()).with(httpBasic(LOGIN, PASSWORD)))
                 .andExpect(status().isNotFound());
     }
 }
