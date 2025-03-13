@@ -1,6 +1,7 @@
 package com.gradleproject.controller;
 
 import com.gradleproject.service.ApplicationScopedBean;
+import com.gradleproject.service.DashboardService;
 import com.gradleproject.service.LoggingService;
 import com.gradleproject.service.LoggingServiceNoProxy;
 import com.gradleproject.service.PrototypeBean;
@@ -31,6 +32,8 @@ public class ScopeController {
 
     private final LoggingServiceNoProxy loggingServiceNoProxy;
 
+    private final DashboardService dashboardService;
+
     @Autowired
     public ScopeController(SingletonService singletonService,
                            PrototypeBean prototypeBean,
@@ -38,7 +41,8 @@ public class ScopeController {
                            SessionScopedBean sessionScopedBean,
                            ApplicationScopedBean applicationScopedBean,
                            LoggingService loggingService,
-                           LoggingServiceNoProxy loggingServiceNoProxy) {
+                           LoggingServiceNoProxy loggingServiceNoProxy,
+                           DashboardService dashboardService) {
         this.singletonService = singletonService;
         this.prototypeBean = prototypeBean;
         this.requestScopedBean = requestScopedBean;
@@ -46,6 +50,7 @@ public class ScopeController {
         this.applicationScopedBean = applicationScopedBean;
         this.loggingService = loggingService;
         this.loggingServiceNoProxy = loggingServiceNoProxy;
+        this.dashboardService = dashboardService;
     }
 
     /**
@@ -111,6 +116,24 @@ public class ScopeController {
     public String noProxyScope() {
         // Each HTTP request will obtain its own RequestScopedBeanNoProxy instance.
         return loggingServiceNoProxy.log();
+    }
+
+
+    /**
+     * Endpoint to retrieve the dashboard summary.
+     */
+    @GetMapping("/dashboard")
+    public String getDashboard() {
+        return dashboardService.getDashboardSummary();
+    }
+
+    /**
+     * Endpoint to generate a report.
+     * This call will trigger the lazy initialization of ReportGenerationService.
+     */
+    @GetMapping("/dashboard/report")
+    public String getDashboardReport() {
+        return dashboardService.generateDashboardReport();
     }
 
 }

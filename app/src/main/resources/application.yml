@@ -13,9 +13,7 @@ spring:
     hibernate:
       ddl-auto: none   # Use 'none' or 'validate' since Flyway manages your schema
     show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+
 
   flyway:
     enabled: true
@@ -24,7 +22,10 @@ spring:
 logging:
   level:
     root: INFO
-    com.example.demo: DEBUG
+    org.hibernate.SQL: error
+    org.hibernate.type.descriptor.sql.BasicBinder: error
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
 
 management:
   endpoints:
