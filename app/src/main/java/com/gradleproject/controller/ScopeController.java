@@ -1,6 +1,8 @@
 package com.gradleproject.controller;
 
 import com.gradleproject.service.ApplicationScopedBean;
+import com.gradleproject.service.LoggingService;
+import com.gradleproject.service.LoggingServiceNoProxy;
 import com.gradleproject.service.PrototypeBean;
 import com.gradleproject.service.RequestScopedBean;
 import com.gradleproject.service.SessionScopedBean;
@@ -16,22 +18,34 @@ import java.util.Arrays;
 public class ScopeController {
 
     private final SingletonService singletonService;
+
     private final PrototypeBean prototypeBean;
+
     private final RequestScopedBean requestScopedBean;
+
     private final SessionScopedBean sessionScopedBean;
+
     private final ApplicationScopedBean applicationScopedBean;
+
+    private final LoggingService loggingService;
+
+    private final LoggingServiceNoProxy loggingServiceNoProxy;
 
     @Autowired
     public ScopeController(SingletonService singletonService,
                            PrototypeBean prototypeBean,
                            RequestScopedBean requestScopedBean,
                            SessionScopedBean sessionScopedBean,
-                           ApplicationScopedBean applicationScopedBean) {
+                           ApplicationScopedBean applicationScopedBean,
+                           LoggingService loggingService,
+                           LoggingServiceNoProxy loggingServiceNoProxy) {
         this.singletonService = singletonService;
         this.prototypeBean = prototypeBean;
         this.requestScopedBean = requestScopedBean;
         this.sessionScopedBean = sessionScopedBean;
         this.applicationScopedBean = applicationScopedBean;
+        this.loggingService = loggingService;
+        this.loggingServiceNoProxy = loggingServiceNoProxy;
     }
 
     /**
@@ -80,4 +94,23 @@ public class ScopeController {
         return "App Name: " + applicationScopedBean.getConfigValue("app.name") +
                 ", App Version: " + applicationScopedBean.getConfigValue("app.version");
     }
+
+    /**
+     * Proxy Usage.
+     */
+    @GetMapping("/proxy-scope")
+    public String demo() {
+        // Log a message for the current request.
+        loggingService.log("Processing demo request");
+        // Return the current request ID to show that it changes per request.
+        return "Current Request ID: " + loggingService.getCurrentRequestId();
+    }
+
+
+    @GetMapping("/no-proxy-scope")
+    public String noProxyScope() {
+        // Each HTTP request will obtain its own RequestScopedBeanNoProxy instance.
+        return loggingServiceNoProxy.log();
+    }
+
 }
