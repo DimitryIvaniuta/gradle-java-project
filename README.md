@@ -202,10 +202,6 @@ gradle-java-project/
 
 This project is licensed under the [MIT License](LICENSE).
 
-## Author
-
-[Your Name or Organization]
-
 ---
 
 ## Contact
