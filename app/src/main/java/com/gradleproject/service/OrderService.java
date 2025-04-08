@@ -1,5 +1,7 @@
 package com.gradleproject.service;
 
+import com.gradleproject.model.AuditEntry;
+import jakarta.persistence.criteria.Order;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
@@ -45,4 +47,5 @@ public class OrderService {
     public void recordAuditEntry(AuditEntry auditEntry) {
         // Write audit entry to the audit log.
     }
+
 }
