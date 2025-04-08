@@ -2,6 +2,11 @@ server:
   port: 8080
 
 spring:
+  data:
+    redis:
+      url: redis://localhost:6379
+  cache:
+    type: redis
   datasource:
     url: jdbc:postgresql://localhost:5437/mydatabase
     username: postgres
@@ -24,6 +29,7 @@ logging:
     root: INFO
     org.hibernate.SQL: error
     org.hibernate.type.descriptor.sql.BasicBinder: error
+    org.springframework.cache: debug
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
 
