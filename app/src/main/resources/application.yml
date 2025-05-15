@@ -37,6 +37,22 @@ logging:
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
 
+resilience4j:
+  retry:
+    configs:
+      default:
+        max-attempts: 5           # try up to 5 times
+        wait-duration: 200ms      # pause 200ms between retries
+        retry-exceptions:
+          - org.springframework.dao.PessimisticLockingFailureException
+    instances:
+      taskService:               # name must match the @Retry name below
+        max-attempts: 5                   # total tries = 1 initial + 4 retries
+        retry-exceptions:
+          - org.springframework.dao.PessimisticLockingFailureException
+        ignore-exceptions:
+          - java.util.NoSuchElementException
+
 management:
   endpoints:
     web:
