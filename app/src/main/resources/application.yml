@@ -18,7 +18,11 @@ spring:
     hibernate:
       ddl-auto: none   # Use 'none' or 'validate' since Flyway manages your schema
     show-sql: true
-
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
   flyway:
     enabled: true
