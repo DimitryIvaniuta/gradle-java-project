@@ -8,11 +8,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,30 +30,37 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        // 1) Authenticate the user’s credentials
+        // Authenticate credentials
         Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getLogin(),
-                        request.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getLogin(), request.getPassword())
         );
 
-        // 2) Build JWT claims
+        // Collect authorities
+        Set<String> roles = authentication.getAuthorities()
+                .stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toUnmodifiableSet());
+        String scope = String.join(" ", roles);
+
+        // Build claims
         Instant now = Instant.now();
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuer(props.getJwt().getIssuer())
-                .issuedAt(now)
-                .expiresAt(now.plusSeconds(props.getJwt().getExpirationSeconds()))
                 .subject(authentication.getName())
                 .audience(List.of(props.getJwt().getAudience()))
+                .issuedAt(now)
+                .expiresAt(now.plusSeconds(props.getJwt().getExpirationSeconds()))
+                .id(UUID.randomUUID().toString())             // jti
+                .claim("scope", scope)                        // space-delimited (Spring friendly)
+                .claim("roles", roles)                        // array form (useful for clients)
                 .build();
 
-        // 3) Encode the JWT
-        String token = jwtEncoder.encode(
-                JwtEncoderParameters.from(claims)
-        ).getTokenValue();
+        // Explicit RS256 header to match RSA keypair and decoder selector
+        JwsHeader headers = JwsHeader.with(SignatureAlgorithm.RS256).build();
 
-        // 4) Return the token in the response
+        // Encode & sign
+        String token = jwtEncoder.encode(JwtEncoderParameters.from(headers, claims)).getTokenValue();
+
         return ResponseEntity.ok(new AuthResponse(token, "Bearer"));
     }
 }
