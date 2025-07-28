@@ -8,7 +8,7 @@ spring:
   cache:
     type: redis
   datasource:
-    url: jdbc:postgresql://localhost:5437/mydatabase
+    url: jdbc:postgresql://localhost:5447/mydatabase
     username: postgres
     password: mysecretpassword
     driver-class-name: org.postgresql.Driver
@@ -65,3 +65,19 @@ management:
       enabled: true
     loggers:
       enabled: true
+
+security:
+  jwt:
+    issuer: video-metadata-app
+    audience: gradle-java-project-clients
+    secret: 6Uy8wosltinKJIEmdeR06JXdb8kof+zPNkNKkOTIk7s=
+    expiration-seconds: 3600
+    refresh-expiration-seconds: 86400
+    clock-skew-seconds: 60
+    rotation-period-ms: 86400000
+    jwks-uri: http://localhost:8080/api/.well-known/jwks.json
+  keystore:
+    path: classpath:jwt.p12
+    store-password: changeit
+    key-alias: jwt
+    key-password: changeit
